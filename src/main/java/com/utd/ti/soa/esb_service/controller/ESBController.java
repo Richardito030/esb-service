@@ -31,20 +31,14 @@ public class ESBController {
 
     // ---------------------- USUARIOS ----------------------
 
-    @PostMapping("/user")
-    public ResponseEntity<String> createUser(@RequestBody User user,
-                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
-        System.out.println("Request Body " + user);
-        System.out.println("Token recibido " + token);
-
-        if (!auth.validateToken(token)) {
-            return ResponseEntity.status(401).body("Token invalido o expirado");
-        }
+    @PostMapping("/user/login")
+    public ResponseEntity<String> login(@RequestBody String loginPayload) {
 
         try {
             String response = webClient.post()
-                    .uri("http://users.railway.internal:3000/app/users/create")
-                    .body(BodyInserters.fromValue(user))
+                    .uri("http://users.railway.internal:3000/app/users/login")
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .bodyValue(loginPayload)
                     .retrieve()
                     .onStatus(HttpStatus::isError, clientResponse ->
                             clientResponse.bodyToMono(String.class)
@@ -55,10 +49,11 @@ public class ESBController {
             return ResponseEntity.ok(response);
 
         } catch (WebClientResponseException e) {
-            // Devuelve el cuerpo de error en la respuesta
             return ResponseEntity.status(e.getRawStatusCode()).body(e.getResponseBodyAsString());
         }
     }
+
+    // El resto de tus rutas permanecen iguales
 
     @GetMapping("/user/get")
     public ResponseEntity<String> getUsers(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
