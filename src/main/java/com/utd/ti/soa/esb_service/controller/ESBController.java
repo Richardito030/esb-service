@@ -31,12 +31,14 @@ public class ESBController {
 
     // ---------------------- USUARIOS ----------------------
 
-    @PostMapping("/user/login")
-    public ResponseEntity<String> login(@RequestBody String loginPayload) {
-
+    @PostMapping("/user/login/{id}")
+    public ResponseEntity<String> login(
+            @PathVariable("id") String id,
+            @RequestBody String loginPayload
+    ) {
         try {
             String response = webClient.post()
-                    .uri("http://users.railway.internal:3000/app/users/login")
+                    .uri("http://users.railway.internal:3000/app/users/login/{id}", id)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .bodyValue(loginPayload)
                     .retrieve()
@@ -47,7 +49,6 @@ public class ESBController {
                     .block();
 
             return ResponseEntity.ok(response);
-
         } catch (WebClientResponseException e) {
             return ResponseEntity.status(e.getRawStatusCode()).body(e.getResponseBodyAsString());
         }
